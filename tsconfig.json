@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "types": [
+            "node",
+            "jest"
+        ],
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "strict": true
+    },
+    "files": [
+        "src/balletic.ts"
+    ],
+    "exclude": [
+        "src/usage",
+        "*.spec.ts",
+        "**/__mocks__"
+    ]
+}
