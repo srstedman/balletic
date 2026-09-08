@@ -1,3 +1,13 @@
-dist
-node_modules
-tsconfig.tsbuildinfo
+# Build output
+dist/
+*.tsbuildinfo
+
+# Dependency directories
+node_modules/
+
+# Code coverage
+coverage/
+*.lcov
+
+# pnpm
+.pnpm-store
