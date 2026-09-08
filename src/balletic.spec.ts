@@ -1,4 +1,4 @@
-import { registerClass, closeRegistry, getRegistryLength } from './balletic';
+import { closeRegistryWithPriority, getPriorityRegistryLength, Register } from './balletic';
 
 class TestClient {
     interval: NodeJS.Timeout;
@@ -18,12 +18,10 @@ class TestClient {
     }
 }
 
-const registeredTestClient = registerClass<typeof TestClient>(TestClient);
-
+const registeredTestClient = Register<typeof TestClient>(TestClient);
 class RegisteredTestClient extends registeredTestClient {}
 
-const registeredTestClientWithDestroy = registerClass<typeof TestClient>(TestClient, 'destroy');
-
+const registeredTestClientWithDestroy = Register<typeof TestClient>(TestClient, {closeMethodName: 'destroy'});
 class RegisteredTestClientWithDestroy extends registeredTestClientWithDestroy {}
 
 describe('balletic tests', () => {
@@ -36,34 +34,34 @@ describe('balletic tests', () => {
 
     afterEach(async () => {
         // Reset state
-        await closeRegistry();
+        await closeRegistryWithPriority();
     })
 
     describe('registerClass', () => {
         it('should register an instance of RegisteredTestClient', () => {
             const testInstance = new RegisteredTestClient();
 
-            expect(getRegistryLength()).toBe(1);
+            expect(getPriorityRegistryLength()).toBe(1);
 
             testInstance.close();
             // Should clients remove themselves from the registry when explicitly closed?
         });
     });
 
-    describe('closeRegistry', () => {
+    describe('closeRegistryWithPriority', () => {
         it('should close registered instances', async () => {
-            const testInstance = new RegisteredTestClient();
+            new RegisteredTestClient();
 
-            await closeRegistry();
+            await closeRegistryWithPriority();
 
             expect(closeSpy).toHaveBeenCalledTimes(1);
             expect(destroySpy).not.toHaveBeenCalled();
         });
 
         it('should close registered instances with specifed close method name', async () => {
-            const testInstance = new RegisteredTestClientWithDestroy();
+            new RegisteredTestClientWithDestroy();
 
-            await closeRegistry();
+            await closeRegistryWithPriority();
 
             expect(destroySpy).toHaveBeenCalledTimes(1);
         });

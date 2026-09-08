@@ -2,13 +2,17 @@
   "version": "0.0.1",
   "scripts": {
     "build": "rm -rf dist; tsc --build tsconfig.json",
-    "test": "jest"
+    "test": "jest",
+    "lint": "oxlint --fix"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.4.1",
     "jest": "^30.5.1",
-    "ts-jest": "^29.4.12",
+    "oxlint": "^1.82.0",
+    "swc": "^1.0.11",
     "typescript": "^6.0.2"
   }
 }

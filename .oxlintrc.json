@@ -1,0 +1,53 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "jest"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "eslint/no-unused-vars": "error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/usage/*.ts"
+      ],
+      "rules": {
+        "unicorn/no-empty-file": "warn"
+      }
+    },
+    {
+      "files": ["**/*.spec.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "jest/require-hook": "error",
+        "jest/consistent-test-it": "error",
+        "jest/require-top-level-describe": "error",
+        "jest/no-deprecated-functions": "error",
+        "jest/prefer-hooks-in-order": "error",
+        "jest/prefer-hooks-on-top": "error",
+        "jest/padding-around-after-all-blocks": "error",
+        "jest/padding-around-test-blocks": "error",
+        "jest/no-done-callback": "error",
+        "@typescript-eslint/no-magic-numbers": "off",
+        "jest/no-restricted-jest-methods": [
+          "warn",
+          {
+            "resetAllMocks": "Don't use resetAllMocks",
+            "restoreAllMocks": "Don't use restoreAllMocks",
+          }
+        ],
+        "jest/no-conditional-expect": "error",
+        "jest/no-duplicate-hooks": "error"
+      }
+    }
+  ],
+  "env": {
+    "builtin": true
+  }
+}
