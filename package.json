@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "scripts": {
     "build": "rm -rf dist; tsc --build tsconfig.json",
-    "test": "jest",
+    "test": "jest --collect-coverage",
     "lint": "oxlint --fix"
   },
   "devDependencies": {
