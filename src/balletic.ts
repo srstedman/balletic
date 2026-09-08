@@ -13,7 +13,7 @@ interface RegisterOptions {
 const clientRegistryWithPriority: Record<number, RegistryEntry[]> = {};
 
 for (let i = 1; i <= 999; i++) {
-    // init priority arrays
+    // Init priority arrays
     clientRegistryWithPriority[i] = [];
 }
 
@@ -97,7 +97,7 @@ async function shutdown(callback?: Function) {
 }
 
 /**
- * Closes all clients in the client registry in priority order.
+ * Closes all clients in the client registry in priority order
  */
 export async function closeRegistryWithPriority() {
     for (const index in clientRegistryWithPriority) {
