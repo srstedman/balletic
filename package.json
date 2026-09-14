@@ -14,5 +14,8 @@
     "oxlint": "^1.82.0",
     "swc": "^1.0.11",
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "uuid": "^14.0.2"
   }
 }

@@ -33,7 +33,7 @@ initShutdownHandler();
 
 ### Prerequisites
 Clients must either have a `close` method implemented, or you must provide the name of the close method when a client is registered,
- eg.
+ eg. `destroy`, `disconnect`, etc.
 
  ```ts
  class TestClient {

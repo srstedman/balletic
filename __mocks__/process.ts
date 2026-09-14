@@ -1,5 +1,5 @@
 // Used to mock SIGTERM handlers
-const processEvents: Record<string | symbol | number, Function> = {};
+export let processEvents: Record<string | symbol | number, Function> = {};
 
 export const mockProcessOn = jest.spyOn(process, 'on').mockImplementation((signal: string | symbol, cb: Function): any => {
     processEvents[signal] = cb;
@@ -16,6 +16,10 @@ export const mockProcessKill = jest.spyOn(process, 'kill').mockImplementation((p
     processEvents[signal]();
     return true;
 });
+
+export const resetProcessMocks = () => {
+    processEvents = {};
+}
 
 export const restoreProcessMocks = () => {
     mockProcessKill.mockRestore();

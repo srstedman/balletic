@@ -1,8 +1,12 @@
 // Types
 
-type RegistryEntry = [any, string];
+interface RegistryEntry {
+    instance: any;
+    closeMethodName: string;
+};
 
 type Constructor = new (...args: any[]) => {};
+
 interface RegisterOptions {
     closeMethodName?: string;
     priority?: number;
@@ -10,11 +14,11 @@ interface RegisterOptions {
 
 // Implementation
 
-const clientRegistryWithPriority: Record<number, RegistryEntry[]> = {};
+const clientRegistry: Record<number, RegistryEntry[]> = {};
 
 for (let i = 1; i <= 999; i++) {
     // Init priority arrays
-    clientRegistryWithPriority[i] = [];
+    clientRegistry[i] = [];
 }
 
 const defaultOptions = {
@@ -30,30 +34,47 @@ const defaultOptions = {
  */
 export function Register<T extends Constructor>(Base: T, options?: RegisterOptions): Constructor & T {
     return class extends Base {
+        balleticIsClosed: boolean;
+        balleticCloseMethodName: keyof Constructor;
+
         // Override Base's constructor to add instance to client registry any time a new instance is created
         private constructor(...args: any[]) {
             super(...args);
 
             const { closeMethodName, priority } = { ...defaultOptions, ...options };
 
-            clientRegistryWithPriority[priority].push([this, closeMethodName]);
+            this.balleticIsClosed = false;
+            this.balleticCloseMethodName = closeMethodName as keyof Constructor;
+            console.debug(`this.closeMethodName: ${this.balleticCloseMethodName}`);
 
-            // debug log
+            clientRegistry[priority].push({ instance: this, closeMethodName });
+
+            // Override the base close method - keep original implementation but set balleticIsClosed to true
+            // This way, it will not be closed again when the registry is closed
+            const baseCloseMethod: Function = this[this.balleticCloseMethodName];
+
+            if (baseCloseMethod) {
+                const instance = this;
+                this[this.balleticCloseMethodName] = function () {
+                    if (!instance.balleticIsClosed) {
+                        baseCloseMethod.bind(instance)();
+                        instance.balleticIsClosed = true;
+                    }
+                } as never;
+            }
+
+            // Debug log
             console.debug(`Added client: ${this.constructor.name} to registry.`);
-        }
-
-        toString() {
-            return this.constructor.name;
         }
     }
 }
 
-// for testing purposes
-export function getPriorityRegistryLength(): number {
+// For testing purposes
+export function getRegistryLength(): number {
     let length = 0;
 
-    for (const index in clientRegistryWithPriority) {
-        const priorityArray = clientRegistryWithPriority[index];
+    for (const index in clientRegistry) {
+        const priorityArray = clientRegistry[index];
         length += priorityArray.length
     }
 
@@ -67,8 +88,8 @@ export function getPriorityRegistryLength(): number {
  * @param {Function} [callback] Optional callback to invoke after registry is closed
  */
 export function initShutdownHandler(signal = 'SIGTERM', callback?: Function) {
-    process.on(signal, () => {
-        shutdown(callback);
+    process.on(signal, async () => {
+        await shutdown(callback);
     });
 }
 
@@ -79,8 +100,8 @@ export function initShutdownHandler(signal = 'SIGTERM', callback?: Function) {
  */
 export function initShutdownHandlers(signals: string[], callback?: Function) {
     for (const signal of signals) {
-        process.on(signal, () => {
-            shutdown(callback);
+        process.on(signal, async () => {
+            await shutdown(callback);
         });
     }
 }
@@ -90,18 +111,24 @@ export function initShutdownHandlers(signals: string[], callback?: Function) {
  * @param {Function} [callback] Optional callback to invoke after registry is closed 
  */
 async function shutdown(callback?: Function) {
-    await closeRegistryWithPriority();
+    const errors = await closeRegistry();
     if (callback && typeof callback === 'function') {
         await callback();
+    }
+    if (errors.length) {
+        process.exitCode = 1;
     }
 }
 
 /**
  * Closes all clients in the client registry in priority order
+ *  @returns {Promise<string[]>} Array containing any error messages from client close methods
  */
-export async function closeRegistryWithPriority() {
-    for (const index in clientRegistryWithPriority) {
-        const priorityArray = clientRegistryWithPriority[index];
+export async function closeRegistry(): Promise<string[]> {
+    const errors = [];
+
+    for (const index in clientRegistry) {
+        const priorityArray = clientRegistry[index];
         while (priorityArray.length > 0) {
             const entry = priorityArray.shift();
 
@@ -109,14 +136,23 @@ export async function closeRegistryWithPriority() {
                 continue;
             }
 
-            const [client, closeMethodName] = entry;
+            const { instance, closeMethodName } = entry;
 
-            const closeMethod: Function = client?.[closeMethodName];
+            const closeMethod: Function = instance?.[closeMethodName];
 
-            if (closeMethod) {
-                await closeMethod.bind(client)();
-                // Error handling???
+            try {
+                if (!closeMethod) {
+                    throw new Error(`Provided method ${closeMethodName} does not exist on class ${instance.constructor.name}.`);
+                }
+
+                await closeMethod.bind(instance)();
+            } catch (e) {
+                const message = (e as Error)?.message;
+                console.log(`Error closing instance of ${instance.constructor.name}: ${message}`);
+                errors.push(message);
             }
         }
     }
+
+    return errors;
 }

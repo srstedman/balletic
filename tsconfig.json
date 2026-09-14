@@ -5,15 +5,15 @@
             "jest"
         ],
         "outDir": "./dist",
-        "rootDir": "./src",
-        "strict": true
+        "rootDir": ".",
+        "strict": true,
+        "paths": {
+            "__mocks__/*": ["./__mocks__/*"]
+        }
     },
-    "files": [
-        "src/balletic.ts"
+    "include": [
+        "src/*",
+        "src/**/*",
+        "__mocks__"
     ],
-    "exclude": [
-        "src/usage",
-        "*.spec.ts",
-        "**/__mocks__"
-    ]
 }
