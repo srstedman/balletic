@@ -1,3 +1,3 @@
-export { Register, closeRegistry } from './balletic';
-export { initShutdownHandler, initShutdownHandlers } from './initListeners';
-export { type RegisterOptions } from './types';
+export { Register, closeRegistry } from 'src/balletic';
+export { initShutdownHandler, initShutdownHandlers } from 'src/initListeners';
+export { type RegisterOptions } from 'src/types';

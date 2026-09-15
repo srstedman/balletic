@@ -3,7 +3,11 @@
         "types": ["node", "jest"],
         "outDir": "./build_dist",
         "rootDir": ".",
-        "strict": true
+        "strict": true,
+        "paths": {
+            "src/*": ["./src/*"],
+            "adapters/*": ["./src/adapters/*"]
+        }
     },
     "include": ["src/**/*"]
 }

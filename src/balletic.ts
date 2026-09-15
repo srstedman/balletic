@@ -1,4 +1,4 @@
-import { Constructor, RegisterOptions, RegistryEntry } from './types';
+import { Constructor, RegisterOptions, RegistryEntry } from 'src/types';
 
 /**
  * Global client registry

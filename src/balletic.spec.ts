@@ -2,9 +2,8 @@ import {
     RegisteredTestClient,
     RegisteredTestClientWithDestroy,
     TestClient,
-} from './__mocks__/testClient';
-
-import { closeRegistry, getRegistryLength, Register } from './balletic';
+} from 'src/__mocks__/testClient';
+import { closeRegistry, getRegistryLength, Register } from 'src/balletic';
 
 describe('balletic tests', () => {
     const closeSpy = jest.spyOn(TestClient.prototype, 'close');

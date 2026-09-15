@@ -1,8 +1,7 @@
-import { mockSetExitCode, mockSetProcessOnListener } from './__mocks__/processAdapter';
-import { RegisteredTestClient, TestClient } from './__mocks__/testClient';
-
-import { closeRegistry, getRegistryLength } from './balletic';
-import { initShutdownHandler, initShutdownHandlers } from './initListeners';
+import { mockSetExitCode, mockSetProcessOnListener } from 'src/__mocks__/adapters/processAdapter';
+import { RegisteredTestClient, TestClient } from 'src/__mocks__/testClient';
+import { closeRegistry, getRegistryLength } from 'src/balletic';
+import { initShutdownHandler, initShutdownHandlers } from 'src/initListeners';
 
 describe('set up listeners', () => {
     const closeSpy = jest.spyOn(TestClient.prototype, 'close');

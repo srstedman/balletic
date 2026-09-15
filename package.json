@@ -1,11 +1,11 @@
 {
     "version": "0.0.1",
     "scripts": {
-        "build": "rm -rf dist; tsc --build tsconfig.json",
-        "test": "jest --collect-coverage",
+        "build": "tsc --build tsconfig.json",
+        "bundle": "tsdown",
         "lint": "oxfmt; oxlint --fix",
         "prepare": "husky",
-        "bundle": "tsdown"
+        "test": "jest --collect-coverage"
     },
     "devDependencies": {
         "@swc/core": "^1.16.2",

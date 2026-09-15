@@ -1,4 +1,4 @@
-import { Register } from '../balletic';
+import { Register } from 'src/balletic';
 
 export class TestClient {
     interval;

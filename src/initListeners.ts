@@ -1,5 +1,5 @@
-import { setExitCode, setProcessOnListener } from './adapters/processAdapter';
-import { closeRegistry } from './balletic';
+import { setExitCode, setProcessOnListener } from 'adapters/processAdapter';
+import { closeRegistry } from 'src/balletic';
 
 /**
  * Registers a signal listener that invokes the shutdown function.
