@@ -3,10 +3,7 @@
         "types": ["node", "jest"],
         "outDir": "./dist",
         "rootDir": ".",
-        "strict": true,
-        "paths": {
-            "__mocks__/*": ["./__mocks__/*"]
-        }
+        "strict": true
     },
-    "include": ["src/*", "src/**/*", "__mocks__"]
+    "include": ["src/**/*"]
 }

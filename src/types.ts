@@ -1,5 +1,5 @@
 export interface RegistryEntry {
-    instance: any;
+    client: any;
     closeMethodName: string;
 }
 

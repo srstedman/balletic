@@ -1,6 +1,8 @@
-import { setExitCode, setProcessOnListener } from './processAdapter';
 import { Constructor, RegisterOptions, RegistryEntry } from './types';
 
+/**
+ * Global client registry
+ */
 const clientRegistry: Record<number, RegistryEntry[]> = {};
 
 for (let i = 1; i <= 999; i++) {
@@ -27,7 +29,7 @@ export function Register<T extends Constructor>(
         balleticIsClosed: boolean;
         balleticCloseMethodName: keyof Constructor;
 
-        // Override Base's constructor to add instance to client registry any time a new instance is created
+        // Override Base's constructor to add instance to clsrc/balletic.tsient registry any time a new instance is created
         private constructor(...args: any[]) {
             super(...args);
 
@@ -37,7 +39,7 @@ export function Register<T extends Constructor>(
             this.balleticCloseMethodName = closeMethodName as keyof Constructor;
             console.debug(`this.closeMethodName: ${this.balleticCloseMethodName}`);
 
-            clientRegistry[priority].push({ instance: this, closeMethodName });
+            clientRegistry[priority].push({ client: this, closeMethodName });
 
             // Override the base close method - keep original implementation but set balleticIsClosed to true
             // This way, it will not be closed again when the registry is closed
@@ -58,7 +60,10 @@ export function Register<T extends Constructor>(
     };
 }
 
-// For testing purposes
+/**
+ * For testing purposes
+ * @returns {number}  Total number of clients in registry
+ */
 export function getRegistryLength(): number {
     let length = 0;
 
@@ -71,54 +76,17 @@ export function getRegistryLength(): number {
 }
 
 /**
- * Registers a signal listener that invokes the shutdown function.
- * Defaults to SIGTERM unless signal is specified.
- * @param {string} [signal="SIGTERM"] Signal for which to register shutdown listener
- * @param {Function} [callback] Optional callback to invoke after registry is closed
- */
-export function initShutdownHandler(signal = 'SIGTERM', callback?: Function) {
-    console.log(`setProcessOnListener: ${setProcessOnListener}`);
-    setProcessOnListener(signal, async () => {
-        await shutdown(callback);
-    });
-}
-
-/**
- *
- * @param {string[]} signals
- * @param {Function} [callback] Optional callback to invoke after registry is closed
- */
-export function initShutdownHandlers(signals: string[], callback?: Function) {
-    for (const signal of signals) {
-        setProcessOnListener(signal, async () => {
-            await shutdown(callback);
-        });
-    }
-}
-
-/**
- * Closes registry and then invokes optional callback
- * @param {Function} [callback] Optional callback to invoke after registry is closed
- */
-async function shutdown(callback?: Function) {
-    const errors = await closeRegistry();
-    if (callback && typeof callback === 'function') {
-        await callback();
-    }
-    if (errors.length) {
-        setExitCode(1);
-    }
-}
-
-/**
  * Closes all clients in the client registry in priority order
  *  @returns {Promise<string[]>} Array containing any error messages from client close methods
  */
 export async function closeRegistry(): Promise<string[]> {
-    const errors = [];
+    const errors: string[] = [];
 
     for (const index in clientRegistry) {
         const priorityArray = clientRegistry[index];
+
+        const promises: Promise<void>[] = [];
+
         while (priorityArray.length > 0) {
             const entry = priorityArray.shift();
 
@@ -126,24 +94,28 @@ export async function closeRegistry(): Promise<string[]> {
                 continue;
             }
 
-            const { instance, closeMethodName } = entry;
+            const { client, closeMethodName } = entry;
 
-            const closeMethod: Function = instance?.[closeMethodName];
+            const closeMethod: Function = client?.[closeMethodName];
 
             try {
                 if (!closeMethod) {
                     throw new Error(
-                        `Provided method ${closeMethodName} does not exist on class ${instance.constructor.name}.`,
+                        `Provided method ${closeMethodName} does not exist on class ${client.constructor.name}.`,
                     );
                 }
 
-                await closeMethod();
+                promises.push(closeMethod());
             } catch (e) {
                 const message = (e as Error)?.message;
-                console.log(`Error closing instance of ${instance.constructor.name}: ${message}`);
+                console.log(`Error closing instance of ${client.constructor.name}: ${message}`);
                 errors.push(message);
             }
         }
+
+        // Clients at the same priority level will be closed asynchronously, but we await the closing of all
+        // before progressing to the next priority level.
+        await Promise.allSettled(promises);
     }
 
     return errors;
