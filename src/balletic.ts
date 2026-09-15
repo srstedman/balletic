@@ -1,4 +1,5 @@
 import { setExitCode, setProcessOnListener } from './processAdapter';
+import { Constructor, RegisterOptions, RegistryEntry } from './types';
 
 const clientRegistry: Record<number, RegistryEntry[]> = {};
 
