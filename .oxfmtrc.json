@@ -20,7 +20,6 @@
         ],
         "groups": [
             "module-mocks",
-            "src-mocks",
             "parent-mocks",
             "sibling-mocks",
             "type-import",

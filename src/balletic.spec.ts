@@ -27,12 +27,12 @@ class TestClient {
 }
 
 const registeredTestClient = Register<typeof TestClient>(TestClient);
-class RegisteredTestClient extends registeredTestClient { }
+class RegisteredTestClient extends registeredTestClient {}
 
 const registeredTestClientWithDestroy = Register<typeof TestClient>(TestClient, {
     closeMethodName: 'destroy',
 });
-class RegisteredTestClientWithDestroy extends registeredTestClientWithDestroy { }
+class RegisteredTestClientWithDestroy extends registeredTestClientWithDestroy {}
 
 describe('balletic tests', () => {
     const closeSpy = jest.spyOn(TestClient.prototype, 'close');
@@ -130,7 +130,7 @@ describe('balletic tests', () => {
                 const improperlyRegisteredTest = Register<typeof TestClient>(TestClient, {
                     closeMethodName: 'disconnect',
                 });
-                class ImproperlyRegisteredTestClient extends improperlyRegisteredTest { }
+                class ImproperlyRegisteredTestClient extends improperlyRegisteredTest {}
 
                 const client = new ImproperlyRegisteredTestClient();
 
