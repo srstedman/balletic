@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "types": ["node", "jest"],
-        "outDir": "./dist",
+        "outDir": "./build_dist",
         "rootDir": ".",
         "strict": true
     },
