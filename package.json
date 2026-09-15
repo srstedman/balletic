@@ -3,20 +3,23 @@
     "scripts": {
         "build": "rm -rf dist; tsc --build tsconfig.json",
         "test": "jest --collect-coverage",
-        "lint": "oxfmt; oxlint --fix"
-    },
-    "dependencies": {
-        "uuid": "^14.0.2"
+        "lint": "oxfmt; oxlint --fix",
+        "prepare": "husky"
     },
     "devDependencies": {
         "@swc/core": "^1.16.2",
         "@swc/jest": "^0.2.39",
         "@types/jest": "^30.0.0",
         "@types/node": "^26.4.1",
+        "husky": "^9.1.7",
         "jest": "^30.5.1",
+        "lint-staged": "^17.5.1",
         "oxfmt": "^0.67.0",
         "oxlint": "^1.82.0",
         "swc": "^1.0.11",
         "typescript": "^6.0.2"
+    },
+    "lint-staged": {
+        "*": "oxfmt --no-error-on-unmatched-pattern"
     }
 }
