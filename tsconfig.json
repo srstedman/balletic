@@ -1,9 +1,6 @@
 {
     "compilerOptions": {
-        "types": [
-            "node",
-            "jest"
-        ],
+        "types": ["node", "jest"],
         "outDir": "./dist",
         "rootDir": ".",
         "strict": true,
@@ -11,9 +8,5 @@
             "__mocks__/*": ["./__mocks__/*"]
         }
     },
-    "include": [
-        "src/*",
-        "src/**/*",
-        "__mocks__"
-    ],
+    "include": ["src/*", "src/**/*", "__mocks__"]
 }

@@ -1,18 +1,4 @@
-// Types
-
-interface RegistryEntry {
-    instance: any;
-    closeMethodName: string;
-};
-
-type Constructor = new (...args: any[]) => {};
-
-interface RegisterOptions {
-    closeMethodName?: string;
-    priority?: number;
-}
-
-// Implementation
+import { setExitCode, setProcessOnListener } from './processAdapter';
 
 const clientRegistry: Record<number, RegistryEntry[]> = {};
 
@@ -23,16 +9,19 @@ for (let i = 1; i <= 999; i++) {
 
 const defaultOptions = {
     closeMethodName: 'close',
-    priority: 999
-}
+    priority: 999,
+};
 
 /**
  * Mixin function that overrides Base's constructor to add instance to client registry upon creation
  * @param {T extends Constructor} Base
- * @param {RegisterOptions} options 
+ * @param {RegisterOptions} options
  * @returns {Constructor & T} Registered version of Base class
  */
-export function Register<T extends Constructor>(Base: T, options?: RegisterOptions): Constructor & T {
+export function Register<T extends Constructor>(
+    Base: T,
+    options?: RegisterOptions,
+): Constructor & T {
     return class extends Base {
         balleticIsClosed: boolean;
         balleticCloseMethodName: keyof Constructor;
@@ -54,19 +43,18 @@ export function Register<T extends Constructor>(Base: T, options?: RegisterOptio
             const baseCloseMethod: Function = this[this.balleticCloseMethodName];
 
             if (baseCloseMethod) {
-                const instance = this;
-                this[this.balleticCloseMethodName] = function () {
-                    if (!instance.balleticIsClosed) {
-                        baseCloseMethod.bind(instance)();
-                        instance.balleticIsClosed = true;
+                this[this.balleticCloseMethodName] = (() => {
+                    if (!this.balleticIsClosed) {
+                        baseCloseMethod.bind(this)();
+                        this.balleticIsClosed = true;
                     }
-                } as never;
+                }) as never;
             }
 
             // Debug log
             console.debug(`Added client: ${this.constructor.name} to registry.`);
         }
-    }
+    };
 }
 
 // For testing purposes
@@ -75,32 +63,33 @@ export function getRegistryLength(): number {
 
     for (const index in clientRegistry) {
         const priorityArray = clientRegistry[index];
-        length += priorityArray.length
+        length += priorityArray.length;
     }
 
     return length;
 }
 
 /**
- * Registers a signal listener that invokes the shutdown function. 
+ * Registers a signal listener that invokes the shutdown function.
  * Defaults to SIGTERM unless signal is specified.
  * @param {string} [signal="SIGTERM"] Signal for which to register shutdown listener
  * @param {Function} [callback] Optional callback to invoke after registry is closed
  */
 export function initShutdownHandler(signal = 'SIGTERM', callback?: Function) {
-    process.on(signal, async () => {
+    console.log(`setProcessOnListener: ${setProcessOnListener}`);
+    setProcessOnListener(signal, async () => {
         await shutdown(callback);
     });
 }
 
 /**
- * 
- * @param {string[]} signals 
- * @param {Function} [callback] Optional callback to invoke after registry is closed 
+ *
+ * @param {string[]} signals
+ * @param {Function} [callback] Optional callback to invoke after registry is closed
  */
 export function initShutdownHandlers(signals: string[], callback?: Function) {
     for (const signal of signals) {
-        process.on(signal, async () => {
+        setProcessOnListener(signal, async () => {
             await shutdown(callback);
         });
     }
@@ -108,7 +97,7 @@ export function initShutdownHandlers(signals: string[], callback?: Function) {
 
 /**
  * Closes registry and then invokes optional callback
- * @param {Function} [callback] Optional callback to invoke after registry is closed 
+ * @param {Function} [callback] Optional callback to invoke after registry is closed
  */
 async function shutdown(callback?: Function) {
     const errors = await closeRegistry();
@@ -116,7 +105,7 @@ async function shutdown(callback?: Function) {
         await callback();
     }
     if (errors.length) {
-        process.exitCode = 1;
+        setExitCode(1);
     }
 }
 
@@ -142,10 +131,12 @@ export async function closeRegistry(): Promise<string[]> {
 
             try {
                 if (!closeMethod) {
-                    throw new Error(`Provided method ${closeMethodName} does not exist on class ${instance.constructor.name}.`);
+                    throw new Error(
+                        `Provided method ${closeMethodName} does not exist on class ${instance.constructor.name}.`,
+                    );
                 }
 
-                await closeMethod.bind(instance)();
+                await closeMethod();
             } catch (e) {
                 const message = (e as Error)?.message;
                 console.log(`Error closing instance of ${instance.constructor.name}: ${message}`);

@@ -1,8 +1,9 @@
 # Balletic
+
 Balletic is a lightweight tool for handling graceful client shutdown in Node.js. Registering a client overrides its constructor, such that creating a new instance adds the instance to the global client registry. Registered client instances are shut down sequentially when `closeRegistry` is called or when the built in shutdown listener is invoked.
 
-
 ## Registering a Client
+
 ```ts
 class TestClient {
     interval: NodeJS.Timeout;
@@ -32,11 +33,12 @@ initShutdownHandler();
 ```
 
 ### Prerequisites
-Clients must either have a `close` method implemented, or you must provide the name of the close method when a client is registered,
- eg. `destroy`, `disconnect`, etc.
 
- ```ts
- class TestClient {
+Clients must either have a `close` method implemented, or you must provide the name of the close method when a client is registered,
+eg. `destroy`, `disconnect`, etc.
+
+```ts
+class TestClient {
     interval: NodeJS.Timeout;
 
     constructor() {
@@ -52,9 +54,10 @@ Clients must either have a `close` method implemented, or you must provide the n
 }
 
 const RegisteredTestClientWithDestroy = Register(TestClient, 'destroy');
- ```
+```
 
 ### Priority
+
 Optionally specify a priority (`1-999`) for a registered class. Priority applies to the registered class, not each instance created; all instances of a registered class will share a priority. Within a priority level, registered clients are closed sequentially in the order in which they are created. Priority can be useful when you have a client that must complete pending tasks (eg. a server instance with pending requests) before the clients it is dependent on (eg. database client, logger client) can be closed. Default priority is `999`.
 
 ```ts
@@ -62,7 +65,9 @@ Optionally specify a priority (`1-999`) for a registered class. Priority applies
 ```
 
 ## Implementing shutdown signal listener
+
 Balletic provides a general purpose shutdown listener which sequentially closes each registered client when the specified signal is received and then invokes an optional callback. Use the callback if you need additional cleanup after the client registry is closed.
 
 ### Shutdown callback
+
 Use the shutdown callback if there are additional tasks to execute after the client registry is closed.

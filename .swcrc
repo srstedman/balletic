@@ -6,9 +6,7 @@
         },
         "baseUrl": "./",
         "paths": {
-            "__mocks__/*": [
-                "__mocks__/*"
-            ]
+            "__mocks__/*": ["__mocks__/*"]
         }
     }
 }

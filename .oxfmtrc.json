@@ -1,0 +1,40 @@
+{
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "tabWidth": 4,
+    "singleQuote": true,
+    "sortImports": {
+        "newlinesBetween": true,
+        "customGroups": [
+            {
+                "groupName": "module-mocks",
+                "elementNamePattern": ["__mocks__/**"]
+            },
+            {
+                "groupName": "parent-mocks",
+                "elementNamePattern": ["../**/__mocks__/**"]
+            },
+            {
+                "groupName": "sibling-mocks",
+                "elementNamePattern": ["./__mocks__/**"]
+            }
+        ],
+        "groups": [
+            "module-mocks",
+            "src-mocks",
+            "parent-mocks",
+            "sibling-mocks",
+            "type-import",
+            "value-external",
+            "value-builtin",
+            "type-internal",
+            "value-internal",
+            "type-parent",
+            "value-parent",
+            "type-sibling",
+            "value-sibling",
+            "type-index",
+            "value-index",
+            "unknown"
+        ]
+    }
+}
